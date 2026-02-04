@@ -24,17 +24,17 @@ class galaxy:
         self.full_x_pos = np.float32(self.data.star['pos'].in_units('pc')[:][:,0])
         self.full_y_pos = np.float32(self.data.star['pos'].in_units('pc')[:][:,1])
         self.full_z_pos = np.float32(self.data.star['pos'].in_units('pc')[:][:,2])
-        #self.full_mass = np.float32(self.data.star['massform'].in_units('Msol')[:]) # in solar masses	
+        self.full_mass = np.float32(self.data.star['massform'].in_units('Msol')[:]) # in solar masses	
         self.full_mass = np.float32(self.data.star['mass'].in_units('Msol')[:]) # in solar masses	
         self.full_current_mass = np.float32(self.data.star['mass'].in_units('Msol')[:])
         self.full_metals = np.float32(self.data.star['metals'][:])
-        #self.full_age = np.float32(self.data.star['age'].in_units('yr')[:])
-        self.full_age = np.float32(self.data.star['tform'].in_units('yr')[:])
+        self.full_age = np.float32(self.data.star['age'].in_units('yr')[:])
+        #self.full_age = np.float32(self.data.star['tform'].in_units('yr')[:])
         self.full_x_vel = np.float32(self.data.star['vel'].in_units('km s**-1')[:][:,0])
         self.full_y_vel = np.float32(self.data.star['vel'].in_units('km s**-1')[:][:,1])
         self.full_z_vel = np.float32(self.data.star['vel'].in_units('km s**-1')[:][:,2])
-        #self.full_smooth = 2*np.float32(self.data.star['smooth'].in_units('pc')[:]) # 2 times gravitational softening length
-        self.full_smooth = 2*np.float32(self.data.star['eps'].in_units('pc')[:]) # 2 times gravitational softening length
+        self.full_smooth = 2*np.float32(self.data.star['smooth'].in_units('pc')[:]) # 2 times gravitational softening length
+        #self.full_smooth = 2*np.float32(self.data.star['eps'].in_units('pc')[:]) # 2 times gravitational softening length
 
 
         self.full_x_pos_dust = np.float32(self.data.gas['pos'].in_units('pc')[:][:,0])
