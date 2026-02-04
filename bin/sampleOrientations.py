@@ -19,8 +19,8 @@ args = parser.parse_args()
 num = int(args.num)-1 # first one is inc=0 az=0, already included in original ski file
 
 origDir = os.getcwd()
-codePath=expanduser('~')+'/nihao2/'
-resultPath = '/scratch/ntf229/nihao2/' # store results here
+codePath=expanduser('~')+'/nihao/NIHAO-SKIRT-Pipeline/'
+resultPath = '/mnt/data0/pkrsnak/nihao2/' # store results here
 
 # Directory structure stores important parameters
 particlePath = resultPath+'Particles/noAgeSmooth/noSF/'
@@ -67,7 +67,7 @@ for child in root.iter('instruments'):
         child.insert(0,deepcopy(fullBB))
 tree.write(SKIRTPath+'sph.ski', encoding='UTF-8', xml_declaration=True)
 # change parameter  values in newly created .ski file 
-os.system('python '+codePath+'python/sampleOrientations_modify_ski.py --filePath='+
+os.system('python3 '+codePath+'python/sampleOrientations_modify_ski.py --filePath='+
           SKIRTPath+'sph.ski --size='+str(maxLength))
 # go to SKIRT directory and run, then cd back
 os.chdir(SKIRTPath)
