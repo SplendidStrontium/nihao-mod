@@ -47,8 +47,8 @@ z = args.z
 galaxy = args.galaxy
 
 origDir = os.getcwd()
-codePath=expanduser('~')+'/nihao2/'
-resultPath = '/scratch/ntf229/nihao2/' # store results here
+codePath=expanduser('~')+'/nihao/NIHAO-SKIRT-Pipeline/'
+resultPath = '/mnt/data0/pkrsnak/nihao2/' # store results here
 
 # Directory structure stores important parameters
 SKIRTPath = resultPath+'sampleOrientations_SKIRT/z'+z+'/'+galaxy+'/'
