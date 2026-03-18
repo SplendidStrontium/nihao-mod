@@ -28,8 +28,8 @@ parser.add_argument("--galaxy") # name of galaxy
 args = parser.parse_args()
 
 origDir = os.getcwd()
-codePath=expanduser('~')+'/nihao/NIHAO-SKIRT-Pipeline'
-resultPath = '/mnt/data0/pkrsnak/nihao2' # store results here
+codePath=expanduser('~')+'/nihao/NIHAO-SKIRT-Pipeline/'
+resultPath = '/mnt/data0/pkrsnak/nihao2/' # store results here
 selectedPath = resultPath+'selectedOrientations/z'+args.z+'/'+args.galaxy+'/'
 
 # Directory structure stores important parameters

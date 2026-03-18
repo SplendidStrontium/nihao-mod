@@ -2,6 +2,7 @@
 
 import numpy as np
 import os
+from os.path import expanduser
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -12,8 +13,8 @@ args = parser.parse_args()
 z = args.z
 galaxy = args.galaxy
 
-codePath = '/home/ntf229/nihao2/'
-resultPath = '/scratch/ntf229/nihao2/' # store results here
+codePath = expanduser('~') + '/nihao/NIHAO-SKIRT-Pipeline/'
+resultPath = '/mnt/data0/pkrsnak/nihao2/'
 
 # Directory structure stores important parameters
 sampledPath = resultPath+'sampledAxisRatios/z'+z+'/'+galaxy+'/'
