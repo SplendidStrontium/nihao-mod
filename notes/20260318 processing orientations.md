@@ -41,6 +41,8 @@ There are lots of new parameters here, so let's review what needs to be set. Som
 --z=0  # redshift
 --galaxy=g15784  # which galaxy we're working on
 
-> python3 bin/bestParamsRT.py --ageSmooth=False --SF=False --tauClear=10 --numPhotons=1e7 --pixels=250 --dustFraction=0.3 --maxTemp=7e4 --SSP=Bpass_Chabrier --z=0 --galaxy=g15784
+> python bin/bestParamsRT.py --ageSmooth=False --SF=False --tauClear=10 --numPhotons=1e7 --pixels=250 --dustFraction=0.3 --maxTemp=7e4 --SSP=Bpass_Chabrier --z=0 --galaxy=g15784
 
 Some errors here so let's try to troubleshoot them. 
+
+Changed python3 to just python in .bashrc -- but that doesn't seem to address the key error in that SKIRT is trying to call old python, regardless of what my .bashrc says.
