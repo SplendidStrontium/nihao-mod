@@ -37,10 +37,10 @@ There are lots of new parameters here, so let's review what needs to be set. Som
 --pixels=250  # img resolution
 --dustFraction=0.3  # dust-to-metal ratio
 --maxTemp=7e4  # maximum temperature at which dust can exist
---SSP=bc03_Chabrier  # simple stellar population model & IMF; how does stellar mass become light output
+--SSP=  # simple stellar population model & IMF; how does stellar mass become light output
 --z=0  # redshift
 --galaxy=g15784  # which galaxy we're working on
 
-> python3 bin/bestParamsRT.py --ageSmooth=False --SF=False --tauClear=10 --numPhotons=1e7 --pixels=250 --dustFraction=0.3 --maxTemp=7e4 --SSP=bc03_Chabrier --z=0 --galaxy=g15784
+> python3 bin/bestParamsRT.py --ageSmooth=False --SF=False --tauClear=10 --numPhotons=1e7 --pixels=250 --dustFraction=0.3 --maxTemp=7e4 --SSP=Bpass_Chabrier --z=0 --galaxy=g15784
 
 Some errors here so let's try to troubleshoot them. 
