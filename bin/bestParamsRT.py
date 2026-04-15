@@ -121,11 +121,12 @@ else:
             fullSED.set('azimuth', str(selectedAz[i+1])+' deg')
             fullSED.set('instrumentName', 'SED_'+instName)
             child.insert(0,deepcopy(fullSED))
-    tree.write(SKIRTPath+'sph.ski', encoding='UTF-8', xml_declaration=True)
+    ##tree.write(SKIRTPath+'sph.ski', encoding='UTF-8', xml_declaration=True)
     # go to SKIRT directory and run, then cd back
     os.chdir(SKIRTPath)
     os.system('skirt sph.ski')
-    os.system('python -m pts.do plot_density_cuts .')
+    print("yoooo")
+    os.system('python -m pts.do plot_density .')
     # delete text files
     os.system('rm stars.txt')
     os.system('rm gas.txt')
@@ -179,7 +180,7 @@ else:
     # go to SKIRT directory and run, then cd back
     os.chdir(noDustSKIRTPath)
     os.system('skirt sph.ski')
-    os.system('python -m pts.do plot_density_cuts .')
+    os.system('python -m pts.do plot_density .')
     # delete text files
     os.system('rm stars.txt')
     os.system('rm gas.txt')
