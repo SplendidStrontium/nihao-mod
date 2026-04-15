@@ -92,18 +92,18 @@ def makeImages(galaxy, z):
 parser = argparse.ArgumentParser()
 parser.add_argument("--ageSmooth") # if True, smooth ages based on number of star particles (makeTextFiles parameter)
 parser.add_argument("--SF") # if True, star particles younger than 10 Myrs are assigned MAPPINGS-III SEDs (makeTextFiles parameter)
-#parser.add_argument("--tauClear") # clearing time in Myrs for MAPPINGS-III f_PDR calculations (only matters if SF=True) (makeTextFiles parameter)
+parser.add_argument("--tauClear") # clearing time in Myrs for MAPPINGS-III f_PDR calculations (only matters if SF=True) (makeTextFiles parameter)
 parser.add_argument("--numPhotons") # number of photon packages (SKIRT parameter)
 parser.add_argument("--pixels") # number of pixels (square) for image (SKIRT parameter)
-#parser.add_argument("--dustFraction") # dust to metal ratio (SKIRT parameter)
+parser.add_argument("--dustFraction") # dust to metal ratio (SKIRT parameter)
 parser.add_argument("--maxTemp") # maximum temperature at which dust can form (SKIRT parameter)
 parser.add_argument("--SSP") # simple stellar population model including IMF after underscore (SKIRT parameter)
 args = parser.parse_args()
 
-codePath = '/home/ntf229/nihao2/'
-resultPath = '/scratch/ntf229/nihao2/' # store results here
-#fitsPath = '/scratch/ntf229/nihao2/bestParamsFits/ageSmooth/SF/'
-fitsPath = '/scratch/ntf229/nihao2/bestParamsFits/'
+from os.path import expanduser
+codePath = expanduser('~')+'/nihao/NIHAO-SKIRT-Pipeline/'
+resultPath = '/mnt/data0/pkrsnak/nihao2/'
+fitsPath = resultPath+'bestParamsFits/'
 
 if eval(args.ageSmooth):
     fitsPath += 'ageSmooth/'
@@ -115,8 +115,8 @@ else:
     fitsPath += 'noSF/'
 
 # Best parameters
-tauClear = 2.5
-dustFraction = 0.1
+tauClear = float(args.tauClear)
+dustFraction = float(args.dustFraction)
 
 SKIRTPath, plotPath, noDustSKIRTPath, noDustPlotPath, particlePath = directoryStructure(tauClear, dustFraction)
 
@@ -131,15 +131,7 @@ redshifts = list(galaxies['redshift'])
 
 print('reshifts:', redshifts)
 
-strRedshifts = []
-for i in range(len(redshifts)):
-    print('redshifts[i]:', redshifts[i])
-    if redshifts[i] == 2.:
-        strRedshifts.append('2.0')
-    else:
-        strRedshifts.append('3.6')
-
-# flux shape: (10, 20, 500, 500)
+strRedshifts = [str(int(z)) if z == int(z) else str(z) for z in redshifts]
 
 for i in range(len(names)):
     summary = fitsio.read(fitsPath+'resolved/z'+strRedshifts[i]+'/'+names[i]+'_nihao-resolved-photometry.fits', ext='SUMMARY')

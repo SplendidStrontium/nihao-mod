@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- A SKIRT parameter file © Astronomical Observatory, Ghent University -->
-<skirt-simulation-hierarchy type="MonteCarloSimulation" format="9" producer="Python toolkit for SKIRT (SkiFile class)" time="2026-04-15T12:35:32">
+<skirt-simulation-hierarchy type="MonteCarloSimulation" format="9" producer="Python toolkit for SKIRT (SkiFile class)" time="2022-02-28T11:21:20">
   <MonteCarloSimulation userLevel="Regular" simulationMode="DustEmission" numPackets="1e7">
     <random type="Random">
       <Random seed="0"/>
@@ -9,7 +9,7 @@
       <ExtragalacticUnits fluxOutputStyle="Frequency"/>
     </units>
     <cosmology type="Cosmology">
-      <LocalUniverseCosmology/>
+      <FlatUniverseCosmology redshift="1" reducedHubbleConstant="0.675" matterDensityFraction="0.310"/>
     </cosmology>
     <sourceSystem type="SourceSystem">
       <SourceSystem minWavelength="0.04 micron" maxWavelength="2000 micron" sourceBias="0.5">
@@ -41,9 +41,6 @@
     </sourceSystem>
     <mediumSystem type="MediumSystem">
       <MediumSystem>
-        <secondaryEmissionOptions type="SecondaryEmissionOptions">
-          <SecondaryEmissionOptions/>
-        </secondaryEmissionOptions>
         <radiationFieldOptions type="RadiationFieldOptions">
           <RadiationFieldOptions>
             <radiationFieldWLG type="DisjointWavelengthGrid">
@@ -80,7 +77,7 @@
         <grid type="SpatialGrid">
           <PolicyTreeSpatialGrid minX="-105000 pc" maxX="105000 pc" minY="-105000 pc" maxY="105000 pc" minZ="-105000 pc" maxZ="105000 pc" treeType="OctTree">
             <policy type="TreePolicy">
-              <SiteListTreePolicy minLevel="6" maxLevel="99" numExtraLevels="0"/>
+			  <SiteListTreePolicy minLevel="6" maxLevel="99" numExtraLevels="0"/>
             </policy>
           </PolicyTreeSpatialGrid>
         </grid>
@@ -89,13 +86,13 @@
     <instrumentSystem type="InstrumentSystem">
       <InstrumentSystem>
         <defaultWavelengthGrid type="WavelengthGrid">
-          <FileWavelengthGrid filename="combinedWavelengths.txt" relativeHalfWidth="0"/>
+          <LogWavelengthGrid minWavelength="0.04 micron" maxWavelength="2000 micron" numWavelengths="601"/>
         </defaultWavelengthGrid>
         <instruments type="Instrument">
           <FullInstrument instrumentName="broadband" distance="100 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" fieldOfViewX="210000 pc" numPixelsX="250" centerX="0 pc" fieldOfViewY="210000 pc" numPixelsY="250" centerY="0 pc" recordComponents="false" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
-            <wavelengthGrid type="WavelengthGrid">
-              <PredefinedBandWavelengthGrid includeGALEX="true" includeSDSS="true" include2MASS="true" includeWISE="true" includeHERSCHEL="true"/>
-            </wavelengthGrid>
+          	<wavelengthGrid type="WavelengthGrid">
+            	<PredefinedBandWavelengthGrid includeGALEX="true" includeSDSS="true" include2MASS="true" includeWISE="true" includeHERSCHEL="true"/>
+          	</wavelengthGrid>
           </FullInstrument>
           <SEDInstrument instrumentName="SED" distance="100 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" recordComponents="false" numScatteringLevels="0" recordPolarization="false" recordStatistics="false"/>
         </instruments>
@@ -103,10 +100,10 @@
     </instrumentSystem>
     <probeSystem type="ProbeSystem">
       <ProbeSystem>
-        <probes type="Probe">
-          <ConvergenceInfoProbe probeName="spatial_convergence" wavelength="0.55 micron"/>
-          <ConvergenceCutsProbe probeName="media_density_cuts"/>
-        </probes>
+      	<probes type="Probe">
+      		<SpatialGridConvergenceProbe probeName="spatial_convergence" wavelength="0.55 micron"/>
+      		<DefaultMediaDensityCutsProbe probeName="media_density_cuts"/>
+      	</probes>
       </ProbeSystem>
     </probeSystem>
   </MonteCarloSimulation>

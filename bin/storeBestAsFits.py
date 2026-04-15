@@ -34,11 +34,12 @@ def getSFR(galaxy):
     return SKIRT_SFR
 
 def getSFH(galaxy):
-    # star formation history (1D histogram)
-    # ages on log scale in years
     stars = np.load(particlePathNoSF+galaxy[1]+'/'+galaxy[0]+'/stars.npy')
-    ages = stars[:,9] # in years 
-    masses = stars[:,7] # in M_sun
+    ages = stars[:,9]
+    masses = stars[:,7]
+    posMask = ages > 0
+    ages = ages[posMask]
+    masses = masses[posMask]
     binGrid = np.logspace(np.log10(np.amin(ages)), np.log10(np.amax(ages)), num=numBins+1)
     counts, bins = np.histogram(ages, bins=binGrid, weights=masses, density=False)
     ages = bins[:-1]
@@ -46,21 +47,18 @@ def getSFH(galaxy):
     return SFH, ages
 
 def getCEH(galaxy):
-    # chemical evolution history (2D histogram)
-    # ages and metallicities on log scale
     stars = np.load(particlePathNoSF+galaxy[1]+'/'+galaxy[0]+'/stars.npy')
-    ages = stars[:,9] # in years 
-    masses = stars[:,7] # in M_sun
+    ages = stars[:,9]
+    masses = stars[:,7]
     metals = np.float64(stars[:,8])
-    metals[metals==0] = np.amin(metals[metals>0]) # set to smallest nonzero value so we can log scale
+    posMask = ages > 0
+    ages = ages[posMask]
+    masses = masses[posMask]
+    metals = metals[posMask]
+    metals[metals==0] = np.amin(metals[metals>0])  # existing zero-metallicity handling
     xbinGrid = np.logspace(np.log10(np.amin(ages)), np.log10(np.amax(ages)), num=numBins+1)
     ybinGrid = np.logspace(np.log10(np.amin(metals)), np.log10(np.amax(metals)), num=numBins+1)
     counts, xbins, ybins = np.histogram2d(ages, metals, bins=[xbinGrid,ybinGrid], weights=masses, density=False)
-    #CEH = np.zeros((3, numBins, numBins))
-    #xMesh, yMesh = np.meshgrid(xbins[:-1], ybins[:-1])
-    #CEH[0] = xMesh
-    #CEH[1] = yMesh
-    #CEH[2] = counts
     CEH = counts
     metals = ybins[:-1]
     return CEH, metals
@@ -87,13 +85,16 @@ def getAv(galaxy, instName):
     Av = attenuation[Av_index]
     return Av
 
-def reduceImageSize(image): # (x,y,band)
-    newImage = np.zeros((len(image[:,0,0]), int(len(image[0,:,0])/4), int(len(image[0,0,:])/4)))
-    for i in range(len(newImage[:,0,0])): # loop over bands
-        for j in range(4):
-            for k in range(4): 
-                newImage[i,:,:] += image[i,j::4,k::4] # stride 4
-        newImage[i,:,:] /= 16
+def reduceImageSize(image, factor=4):  # (band, x, y)
+    nBands, nx, ny = image.shape
+    newX, newY = nx // factor, ny // factor
+    cropped = image[:, :newX*factor, :newY*factor]  # crop ragged edge if any
+    newImage = np.zeros((nBands, newX, newY))
+    for i in range(nBands):
+        for j in range(factor):
+            for k in range(factor):
+                newImage[i, :, :] += cropped[i, j::factor, k::factor]
+        newImage[i, :, :] /= factor ** 2
     return newImage
 
 def attenuationCurves():
@@ -137,18 +138,20 @@ parser.add_argument("--pixels") # number of pixels (square) for image (SKIRT par
 parser.add_argument("--dustFraction") # dust to metal ratio (SKIRT parameter)
 parser.add_argument("--maxTemp") # maximum temperature at which dust can form (SKIRT parameter)
 parser.add_argument("--SSP") # simple stellar population model including IMF after underscore (SKIRT parameter)
+parser.add_argument("--z") # redshift
+parser.add_argument("--galaxy") # name of galaxy
 args = parser.parse_args()
 
 storeImages = True
 
 numPixels = int(args.pixels)
-reducedPixels = int(numPixels/4)
+reducedPixels = numPixels // 4   # was: int(numPixels/4)
 
 dustFraction = float(args.dustFraction)
 
 origDir = os.getcwd()
-codePath=expanduser('~')+'/nihao2/'
-resultPath = '/scratch/ntf229/nihao2/' # store results here
+codePath=expanduser('~')+'/nihao/NIHAO-SKIRT-Pipeline/'
+resultPath = '/mnt/data0/pkrsnak/nihao2/' # store results here
 selectedPath = resultPath+'selectedOrientations/'
 massPath = resultPath+'GlobalProps/stellarMasses/'
 SFRPath = resultPath+'GlobalProps/SFR/'
@@ -193,6 +196,9 @@ SKIRTPath += 'dust/dustFraction'+args.dustFraction+'/maxTemp'+args.maxTemp+'/'
 SKIRTPath += 'numPhotons'+args.numPhotons+'/'+args.SSP+'/'
 noDustSKIRTPath += 'numPhotons'+args.numPhotons+'/'+args.SSP+'/'
 
+SKIRTPath += 'z'+args.z+'/'+args.galaxy+'/'
+noDustSKIRTPath += 'z'+args.z+'/'+args.galaxy+'/'
+
 os.system('mkdir -p '+savePath)
 if storeImages:
     os.system('mkdir -p '+savePath+'resolved/')
@@ -203,16 +209,16 @@ band_names = np.asarray(['FUV', 'NUV', 'u', 'g', 'r', 'i', 'z', '2MASS_J',
 
 # make names 2d: [[name1, z1], [name2, z2], ... ]
 # names[:,0] gives all names, names[:,1] gives all redshifts
-names = np.asarray([['g2.83e12', 'z2.0'], 
-        ['g2.91e12', 'z2.0'],
-        ['g3.03e12', 'z2.0'],
-        ['g3.09e12', 'z2.0'],
-        ['g3.25e12', 'z2.0'],
-        ['g3.36e12', 'z2.0'],
-        ['g2.96e12', 'z3.6'],
-        ['g2.71e12', 'z3.6'],
-        ['g3.76e12', 'z3.6'],
-        ['g4.36e12', 'z3.6']])
+names = np.asarray([[args.galaxy, 'z'+args.z]])
+#        ['g2.91e12', 'z2.0'],
+#        ['g3.03e12', 'z2.0'],
+#        ['g3.09e12', 'z2.0'],
+#        ['g3.25e12', 'z2.0'],
+#        ['g3.36e12', 'z2.0'],
+#        ['g2.96e12', 'z3.6'],
+#        ['g2.71e12', 'z3.6'],
+#        ['g3.76e12', 'z3.6'],
+#        ['g4.36e12', 'z3.6']])
 
 numOrientations = 10
 numBins = 200 # number of bins for stored SFH / CEH
@@ -301,15 +307,15 @@ for i in range(len(names[:,0])):
     for j in range(numOrientations): # loop through orientations
         instName = 'axisRatio' + str(np.round_(axisRatios[j], decimals=4)) # orientation naming system
         # Spatially integrated
-        BB = np.loadtxt(SKIRTPath+names[i,1]+'/'+names[i,0]+'/sph_broadband_'+instName+'_sed.dat', unpack = True)[1] # spatially integrated broadband fluxes in Janskys
-        noDustBB = np.loadtxt(noDustSKIRTPath+names[i,1]+'/'+names[i,0]+'/sph_broadband_'+instName+'_sed.dat', unpack = True)[1]  # spatially integrated broadband fluxes in Janskys
-        sed = np.loadtxt(SKIRTPath+names[i,1]+'/'+names[i,0]+'/sph_SED_'+instName+'_sed.dat', unpack = True)
+        BB = np.loadtxt(SKIRTPath+'sph_broadband_'+instName+'_sed.dat', unpack = True)[1] # spatially integrated broadband fluxes in Janskys
+        noDustBB = np.loadtxt(noDustSKIRTPath+'sph_broadband_'+instName+'_sed.dat', unpack = True)[1]  # spatially integrated broadband fluxes in Janskys
+        sed = np.loadtxt(SKIRTPath+'sph_SED_'+instName+'_sed.dat', unpack = True)
         if (wave is None): # only need to do once
             wave = sed[0] * 1e4 # spatially integrated SED wavelengths converted to Angstroms
             spectrum = np.zeros((len(names) * numOrientations, len(wave)), dtype=np.float32)
             spectrum_nodust = np.zeros((len(names) * numOrientations, len(wave)), dtype=np.float32)
         spec = sed[1] # spatially integrated SED fluxes in Janskys
-        noDustSed = np.loadtxt(noDustSKIRTPath+names[i,1]+'/'+names[i,0]+'/sph_SED_'+instName+'_sed.dat', unpack = True)
+        noDustSed = np.loadtxt(noDustSKIRTPath+'sph_SED_'+instName+'_sed.dat', unpack = True)
         noDustSpec = noDustSed[1]
         Av = getAv(names[i], instName)
         attenuationWave, attenuationMags = attenuationCurves()
@@ -335,10 +341,10 @@ for i in range(len(names[:,0])):
         attenuation_mags[indx, :] = attenuationMags
         # Spatially resolved
         if storeImages:
-            imageFile = fits.open(SKIRTPath+names[i,1]+'/'+names[i,0]+'/sph_broadband_'+instName+'_total.fits')
+            imageFile = fits.open(SKIRTPath+'sph_broadband_'+instName+'_total.fits')
             imageBB = np.asarray(imageFile[0].data) # (20, 2000, 2000) bands in MJy/st
             imageBB = reduceImageSize(imageBB) # (20, 500, 500)
-            noDustImageFile = fits.open(noDustSKIRTPath+names[i,1]+'/'+names[i,0]+'/sph_broadband_'+instName+'_total.fits')
+            noDustImageFile = fits.open(noDustSKIRTPath+'sph_broadband_'+instName+'_total.fits')
             noDustImageBB = np.asarray(noDustImageFile[0].data) # (20, 2000, 2000) bands in MJy/st
             noDustImageBB = reduceImageSize(noDustImageBB) # (20, 500, 500)
             # Store resolved data
